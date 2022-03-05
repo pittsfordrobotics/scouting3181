@@ -8,7 +8,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 // TODO: 2023 Release - Radio Buttons
 // TODO: now - checkbox
 //  TODO: Pit and match routes,
-//  TODO: deploying on ios and android
+// TODO: NO ; in text fields ; ;; ; ; ;; ; ; ; ;; ; ; ;
 
 String code = "";
 
@@ -60,7 +60,7 @@ class StartingRoute extends StatelessWidget {
                     child: Column(
                       children: [
                         BetterTextField("Enter your name: ", scouterName),
-                        BetterTextField("Team number: ", teamNumber),
+                        BetterTextField("Scouted team number: ", teamNumber),
                         BetterDropdownButton("Scouting Type", const ["Choose", "Pit", "Match"], pitOrMatch),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 25, 0, 0),
@@ -68,15 +68,20 @@ class StartingRoute extends StatelessWidget {
                             onPressed: () {
                               // Validate returns true if the form is valid, or false otherwise.
                               if (formKey.currentState!.validate()) {
-                                if (pitOrMatch.string == "Choose") {
-                                }
-                                else if (pitOrMatch.string == "Pit") {
-                                  code = scouterName.string + teamNumber.string + pitOrMatch.string + ";";
-                                  Navigator.pushNamed(context, '/PIT');
-                                }
-                                else if (pitOrMatch.string == "Match") {
-                                  code = scouterName.string + teamNumber.string + pitOrMatch.string + ";";
-                                  Navigator.pushNamed(context, '/MATCH');
+                                if (teamNumber.string != "3181") {
+                                  if (pitOrMatch.string == "Choose") {}
+                                  else if (pitOrMatch.string == "Pit") {
+                                    code = scouterName.string + ";" +
+                                        teamNumber.string + ";" +
+                                        pitOrMatch.string + ";";
+                                    Navigator.pushNamed(context, '/PIT');
+                                  }
+                                  else if (pitOrMatch.string == "Match") {
+                                    code = scouterName.string + ";" +
+                                        teamNumber.string + ";" +
+                                        pitOrMatch.string + ";";
+                                    Navigator.pushNamed(context, '/MATCH');
+                                  }
                                 }
                               }
                             },
@@ -95,10 +100,12 @@ class StartingRoute extends StatelessWidget {
 }
 class PitRoute extends StatelessWidget {
   BetterList shooterType = BetterList([false, false]);
+  BetterString driveTrain = BetterString("No Drive");
   BetterString climbPosition = BetterString("No Climb");
-  BetterString maxAutoBalls = BetterString("0");
-  BetterString consistentAutoBalls = BetterString("0");
+  BetterString autoBalls = BetterString("0");
   BetterList autoPositions = BetterList([false, false, false, false, false]);
+  BetterString strategy = BetterString("No");
+  BetterString comments = BetterString("");
 
   final formKey = GlobalKey<FormState>();
   final ScrollController scrollController = ScrollController();
@@ -120,12 +127,12 @@ class PitRoute extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                   children: [
+                    BetterDropdownButton("Drive Train", const ["No Drive", "Swerve", "West Coast (6 or 8 wheel tank)", "Mecanum", "Omni"], driveTrain),
                     BetterText("Shooter Type"),
                     BetterCheckboxListTile("High Shooter", shooterType, 0),
                     BetterCheckboxListTile("Low Shooter", shooterType, 1),
                     BetterDropdownButton("Climb Position", const ["No Climb", "Low", "Mid", "High", "Traversal"], climbPosition),
-                    BetterDropdownButton("Max Number of Balls in Auto", const ["0", "1", "2", "3", "4", "5", ">5"], maxAutoBalls),
-                    BetterDropdownButton("Consistent Number of Balls in Auto", const ["0", "1", "2", "3", "4", "5", ">5"], consistentAutoBalls),
+                    BetterDropdownButton("Number of Balls in Auto", const ["0", "1", "2", "3", "4", "5", "> 5"], autoBalls),
                     BetterText("Auto Starting Position"),
                     Image.asset('assets/Field.png'),
                     BetterCheckboxListTile("Position 1", autoPositions, 0),
@@ -133,13 +140,15 @@ class PitRoute extends StatelessWidget {
                     BetterCheckboxListTile("Position 3", autoPositions, 2),
                     BetterCheckboxListTile("Position 4", autoPositions, 3),
                     BetterCheckboxListTile("Position 5", autoPositions, 4),
+                    BetterDropdownButton("Do they want to defend", const ["No", "Yes"], strategy),
+                    BetterTextField("Any extra comments?", comments),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 25, 0, 0),
                       child: ElevatedButton(
                         onPressed: () {
                           // Validate returns true if the form is valid, or false otherwise.
                           if (formKey.currentState!.validate()) {
-                            code += (shooterType.list[0] == true ? "High" : "") + (shooterType.list[1] == true ? "Low" : "") + ";" + climbPosition.string + ";" +  maxAutoBalls.string + ";" + consistentAutoBalls.string + ";" + (autoPositions.list[0] == true ? "1" : "") + (autoPositions.list[1] == true ? "2" : "") + (autoPositions.list[2] == true ? "3" : "") + (autoPositions.list[3] == true ? "4" : "") + (autoPositions.list[4] == true ? "5" : "") + ";";
+                            code += driveTrain.string + ";" + (shooterType.list[0] == true ? "High" : "") + (shooterType.list[1] == true ? "Low" : "") + ";" + climbPosition.string + ";" +  autoBalls.string + ";" + (autoPositions.list[0] == true ? "1" : "") + (autoPositions.list[1] == true ? "2" : "") + (autoPositions.list[2] == true ? "3" : "") + (autoPositions.list[3] == true ? "4" : "") + (autoPositions.list[4] == true ? "5" : "") + ";" + strategy.string + ";" + comments.string;
                             Navigator.pushNamed(context, '/QR');
                           }
                         },
@@ -168,11 +177,13 @@ class PitRoute extends StatelessWidget {
 //TODO: make custom incrementer for counting balls scored
 class MatchRoute extends StatelessWidget {
   BetterList autoPositions = BetterList([false, false, false, false, false]);
+  BetterString taxi = BetterString("No");
   BetterString attemptedAutoBalls = BetterString("0");
   BetterString scoredAutoBalls = BetterString("0");
   BetterString scoredTeleopBalls = BetterString("0");
   BetterString attemptedClimbPosition = BetterString("No Attempt");
   BetterString successfulClimbPosition = BetterString("No Climb");
+  BetterString comments = BetterString("");
 
   final formKey = GlobalKey<FormState>();
   final ScrollController scrollController = ScrollController();
@@ -201,18 +212,20 @@ class MatchRoute extends StatelessWidget {
                     BetterCheckboxListTile("Position 3", autoPositions, 2),
                     BetterCheckboxListTile("Position 4", autoPositions, 3),
                     BetterCheckboxListTile("Position 5", autoPositions, 4),
+                    BetterDropdownButton("Did they leave the tarmac?", const ["No", "Yes"], taxi),
                     BetterDropdownButton("Number of Balls Attempted in Auto", const ["0", "1", "2", "3", "4", "5", ">5"], attemptedAutoBalls),
                     BetterDropdownButton("Number of Balls Scored in Auto", const ["0", "1", "2", "3", "4", "5", ">5"], scoredAutoBalls),
                     BetterTextField("Number of Balls Scored in Teleop", scoredTeleopBalls),
                     BetterDropdownButton("Attempted Climb Position", const ["No Attempt", "Low", "Mid", "High", "Traversal"], attemptedClimbPosition),
                     BetterDropdownButton("Successful Climb Position", const ["No Climb", "Low", "Mid", "High", "Traversal"], successfulClimbPosition),
+                    BetterTextField("Any extra comments?", comments),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 25, 0, 0),
                       child: ElevatedButton(
                         onPressed: () {
                           // Validate returns true if the form is valid, or false otherwise.
                           if (formKey.currentState!.validate()) {
-                            code +=  ";;;;" + (autoPositions.list[0] == true ? "1" : "") + (autoPositions.list[1] == true ? "2" : "") + (autoPositions.list[2] == true ? "3" : "") + (autoPositions.list[3] == true ? "4" : "") + (autoPositions.list[4] == true ? "5" : "") + ";" + attemptedAutoBalls.string + ";" + scoredAutoBalls.string + ";" + scoredTeleopBalls.string + attemptedClimbPosition.string + ";" + successfulClimbPosition.string + ";";
+                            code +=  ";;;;;;;" + (autoPositions.list[0] == true ? "1" : "") + (autoPositions.list[1] == true ? "2" : "") + (autoPositions.list[2] == true ? "3" : "") + (autoPositions.list[3] == true ? "4" : "") + (autoPositions.list[4] == true ? "5" : "") + ";" + taxi.string + ";" + attemptedAutoBalls.string + ";" + scoredAutoBalls.string + ";" + scoredTeleopBalls.string + ";" + attemptedClimbPosition.string + ";" + successfulClimbPosition.string + ";" + comments.string;
                             Navigator.pushNamed(context, '/QR');
                           }
                         },
@@ -248,6 +261,7 @@ class QRPage extends StatelessWidget {
           title: const Text('3181 Scouting 2022'),
         ),
         body: Center(
+          child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(0,100,0,0),
             child: Column(
@@ -267,6 +281,7 @@ class QRPage extends StatelessWidget {
                     child: const Text('Restart'))
               )
               ],
+          ),
           ),
         ),
     ),
@@ -358,7 +373,7 @@ class BetterTextField extends StatelessWidget {
           }
         },
         onChanged: (text) {
-          variable.string = text + ";"; },
+          variable.string = text; },
       ),
     )
     ]
